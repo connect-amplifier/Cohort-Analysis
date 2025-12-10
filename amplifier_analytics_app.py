@@ -32,10 +32,39 @@ def load_data() -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     Returns:
         Tuple of (events_df, people_df, attendees_df)
     """
-    # Load CSVs
-    events_df = pd.read_csv("events.csv")
-    people_df = pd.read_csv("people.csv")
-    attendees_df = pd.read_csv("attendees.csv")
+    # Load CSVs with error handling
+    try:
+        events_df = pd.read_csv("events.csv")
+    except FileNotFoundError:
+        st.error("❌ Error: events.csv not found. Please ensure the file exists in the same directory.")
+        st.stop()
+        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+    except Exception as e:
+        st.error(f"❌ Error loading events.csv: {str(e)}")
+        st.stop()
+        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+    
+    try:
+        people_df = pd.read_csv("people.csv")
+    except FileNotFoundError:
+        st.error("❌ Error: people.csv not found. Please ensure the file exists in the same directory.")
+        st.stop()
+        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+    except Exception as e:
+        st.error(f"❌ Error loading people.csv: {str(e)}")
+        st.stop()
+        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+    
+    try:
+        attendees_df = pd.read_csv("attendees.csv")
+    except FileNotFoundError:
+        st.error("❌ Error: attendees.csv not found. Please ensure the file exists in the same directory.")
+        st.stop()
+        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+    except Exception as e:
+        st.error(f"❌ Error loading attendees.csv: {str(e)}")
+        st.stop()
+        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
     
     # Parse datetime columns and normalize to timezone-naive (always CET/Berlin, no timezone conversion needed)
     date_cols_events = ["Start Date & Time", "End Date & Time"]
@@ -931,6 +960,12 @@ def main():
     # Load data
     with st.spinner("Loading data..."):
         events_df, people_df, attendees_df = load_data()
+    
+    # Validate data was loaded successfully
+    if events_df.empty or people_df.empty or attendees_df.empty:
+        st.error("❌ Error: One or more data files are empty. Please ensure the CSV files contain data.")
+        st.stop()
+        return
     
     # Sidebar filters
     st.sidebar.header("Filters")
